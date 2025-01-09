@@ -1,10 +1,10 @@
 ## Commands:
 
 - [x] echo (with the flag `-n`),
-- [ ] cd,
+- [x] cd,
 - [ ] ls (with the flags `-l`, `-a` and `-F`),
 - [x] pwd,
-- [ ] cat,
+- [x] cat,
 - [ ] cp,
 - [ ] rm (with the flag `-r`),
 - [ ] mv,
