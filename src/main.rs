@@ -1,9 +1,5 @@
-pub mod commands;
-
-use commands::{
-    cat::cat, cd::cd, cp::cp, echo::echo, ls::ls, mkdir::mkdir, mv::mv, pwd::pwd, rm::rm,
-};
-
+mod commands;
+use commands::{cat, cd, cp, echo, ls, mkdir, mv, pwd, rm};
 use std::io::{self, Write};
 
 fn main() {
