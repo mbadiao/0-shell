@@ -1,3 +1,8 @@
-pub fn pwd(args: &[&str]) {
-    println!("COMMAND: pwd, ARGS: {:?}", args);
+use std::env;
+
+pub fn pwd() {
+    match env::current_dir() {
+        Ok(path) => println!("{}", path.display()),
+        Err(e) => eprintln!("pwd: error retrieving current directory: {}", e),
+    }
 }

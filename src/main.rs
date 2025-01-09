@@ -28,7 +28,7 @@ fn main() {
             "echo" => echo(args),
             "cd" => cd(args),
             "ls" => ls(args),
-            "pwd" => pwd(args),
+            "pwd" => pwd(),
             "cat" => cat(args),
             "cp" => cp(args),
             "rm" => rm(args),
