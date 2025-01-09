@@ -4,7 +4,7 @@ use commands::{
     cat::cat, cd::cd, cp::cp, echo::echo, ls::ls, mkdir::mkdir, mv::mv, pwd::pwd, rm::rm,
 };
 
-use std::io::Write;
+use std::io::{self, Write};
 
 fn main() {
     loop {
@@ -13,9 +13,8 @@ fn main() {
 
         // wait for a command
         let mut input = String::new();
-        if let Err(_) = std::io::stdin().read_line(&mut input) {
-            println!("Error reading input.");
-            continue;
+        if io::stdin().read_line(&mut input).is_err() || input.is_empty() {
+            break;
         }
 
         let trimmed = input.trim();
