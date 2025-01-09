@@ -5,8 +5,8 @@
 - [ ] ls (with the flags `-l`, `-a` and `-F`),
 - [x] pwd,
 - [x] cat,
-- [ ] cp,
+- [x] cp,
 - [ ] rm (with the flag `-r`),
-- [ ] mv,
+- [x] mv,
 - [x] mkdir,
 - [x] exit
