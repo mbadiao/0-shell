@@ -2,15 +2,15 @@ use std::fs;
 use std::path::Path;
 use std::io;
 
-pub fn cp(args: &[&str]) {
+pub fn cp(args: Vec<String>) {
     if args.len() != 2 {
         println!("cp: missing file operand");
         println!("Usage: cp <source> <destination>");
         return;
     }
-    let source = args[0];
-    let destination = args[1];
-    if let Err(err) = copy(source, destination) {
+    let source = &args[0];
+    let destination = &args[1];
+    if let Err(err) = copy(&source, &destination) {
         println!("cp: {}", err);
     }
 }

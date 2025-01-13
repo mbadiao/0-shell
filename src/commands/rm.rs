@@ -2,7 +2,7 @@ use std::fs;
 use std::path::Path;
 use std::io;
 
-pub fn rm(args: &[&str]) {
+pub fn rm(args: Vec<String>) {
     if args.is_empty() {
         println!("rm: missing operand");
         println!("Usage: rm [-r] <file1> [file2 ...]");
@@ -14,10 +14,10 @@ pub fn rm(args: &[&str]) {
 
     // Loop through arguments to identify flags and files
     for arg in args {
-        if *arg == "-r" {
+        if &arg == "-r" {
             is_recursive = true;
         } else {
-            files.push(*arg);
+            files.push(arg);
         }
     }
     
@@ -28,7 +28,7 @@ pub fn rm(args: &[&str]) {
     }
     
     for file in files {
-        if let Err(err) = remove_file(file, is_recursive) {
+        if let Err(err) = remove_file(&file, is_recursive) {
             println!("rm: {}", err);
         }
     }

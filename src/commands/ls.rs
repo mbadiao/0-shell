@@ -12,7 +12,7 @@ const _GREEN: &str = "\x1b[32m"; // Fichiers exécutables
 const CYAN: &str = "\x1b[36m"; // Liens symboliques
 const RESET: &str = "\x1b[0m";
 
-pub fn ls(args: &[&str]) {
+pub fn ls(args: Vec<String>) {
     let mut result = String::new();
     let mut total_blocks = 0;
 
@@ -22,7 +22,7 @@ pub fn ls(args: &[&str]) {
 
     // Parse les arguments
     for arg in args {
-        match *arg {
+        match arg.as_str() {
             "-a" => show_all = true,
             "-l" => long_format = true,
             "-F" => show_file_type = true,
@@ -95,7 +95,6 @@ pub fn ls(args: &[&str]) {
 
         if long_format {
             if let Ok(metadata) = entry.metadata() {
-                //println!("name: {:?} ---- blocks: {}", entry.file_name(), metadata.blocks());
                 total_blocks += metadata.blocks() / 2;
                 result.push_str(&print_metadata(&metadata));
             }

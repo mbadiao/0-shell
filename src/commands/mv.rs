@@ -2,15 +2,15 @@ use std::fs;
 use std::path::Path;
 use std::io;
 
-pub fn mv(args: &[&str]) {
+pub fn mv(args: Vec<String>) {
     if args.len() != 2 {
         println!("mv: missing file operand");
         println!("Usage: mv <source> <destination>");
         return;
     }
-    let source = args[0];
-    let destination = args[1];
-    if let Err(err) = move_file(source, destination) {
+    let source = &args[0];
+    let destination = &args[1];
+    if let Err(err) = move_file(&source, &destination) {
         println!("mv: {}", err);
     }
 }

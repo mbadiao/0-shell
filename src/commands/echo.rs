@@ -1,4 +1,4 @@
-pub fn echo(args: &[&str]) {
+pub fn echo(args: Vec<String>) {
     let mut skip_newline = false;
     let mut start_index = 0;
 

@@ -1,14 +1,14 @@
 use std::fs::File;
 use std::io::{self, BufRead, BufReader};
 
-pub fn cat(args: &[&str]) {
+pub fn cat(args: Vec<String>) {
     if args.is_empty() {
         println!("cat: missing file operand");
         return;
     }
 
     for filename in args {
-        if let Err(err) = print_file(filename) {
+        if let Err(err) = print_file(&filename) {
             println!("cat: {}: {}", filename, err);
         }
     }

@@ -1,17 +1,17 @@
 use std::{fs, path::Path};
 
-pub fn mkdir(args: &[&str]) {
+pub fn mkdir(args: Vec<String>) {
     if args.is_empty() {
         eprintln!("mkdir: missing operand");
         return;
     }
 
     let mut recursive = false;
-    let mut paths: Vec<&str> = Vec::new();
+    let mut paths:Vec<String> = Vec::new();
 
     // Handle the flag -p
     for arg in args {
-        if *arg == "-p" {
+        if arg == "-p" {
             recursive = true;
         } else {
             paths.push(arg);
@@ -19,7 +19,7 @@ pub fn mkdir(args: &[&str]) {
     }
 
     for path in paths {
-        let path = Path::new(path);
+        let path = Path::new(&path);
         let result = if recursive {
             fs::create_dir_all(path) // Create nested directories
         } else {
