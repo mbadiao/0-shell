@@ -5,7 +5,17 @@ use std::{
     time::{SystemTime, UNIX_EPOCH},
 };
 
+const PINK: &str = "\x1b[35m";
+const ORANGE: &str = "\x1b[33m";
+const _BLUE: &str = "\x1b[34m"; // Dossiers
+const _GREEN: &str = "\x1b[32m"; // Fichiers exécutables
+const CYAN: &str = "\x1b[36m"; // Liens symboliques
+const RESET: &str = "\x1b[0m";
+
 pub fn ls(args: &[&str]) {
+    let mut result = String::new();
+    let mut total_blocks = 0;
+
     let mut show_all = false;
     let mut long_format = false;
     let mut show_file_type = false;
@@ -33,6 +43,33 @@ pub fn ls(args: &[&str]) {
     };
 
     let mut entries: Vec<DirEntry> = Vec::new();
+
+    if show_all {
+        if long_format {
+            // Pour le format long, ajouter les métadonnées appropriées
+            if let Ok(metadata) = fs::metadata(".") {
+                result.push_str(&print_metadata(&metadata));
+                if show_file_type {
+                    result.push_str("\x1b[35m./\x1b[0m\n");
+                } else {
+                    result.push_str("\x1b[35m.\x1b[0m\n");
+                }
+                total_blocks += metadata.blocks() / 2;
+            }
+            if let Ok(metadata) = fs::metadata("..") {
+                result.push_str(&print_metadata(&metadata));
+                if show_file_type {
+                    result.push_str("\x1b[35m../\x1b[0m\n");
+                } else {
+                    result.push_str("\x1b[35m..\x1b[0m\n");
+                }
+                total_blocks += metadata.blocks() / 2;
+            }
+        } else {
+            result.push_str("\x1b[35m.  ..\x1b[0m  ");
+        }
+    }
+
     for entry in current_dir {
         if let Ok(entry) = entry {
             entries.push(entry);
@@ -42,23 +79,24 @@ pub fn ls(args: &[&str]) {
     // Trier les fichiers par ordre alphabétique
     entries.sort_by_key(|entry| entry.file_name());
 
-    let mut result = String::new();
-    let mut total_size = 0;
-    
     for entry in entries {
         let file_name = entry.file_name();
         let file_name = file_name.to_string_lossy();
-        
+        let mut color = String::new();
+
+        if let Ok(metadata) = entry.metadata() {
+            color = right_color(&metadata);
+        }
+
+        //println!("file_name: {}", file_name);
         if !show_all && file_name.starts_with('.') {
             continue;
         }
-        
-        if let Ok(metadata) = entry.metadata() {
-            total_size += metadata.len();
-        }
-        
+
         if long_format {
             if let Ok(metadata) = entry.metadata() {
+                //println!("name: {:?} ---- blocks: {}", entry.file_name(), metadata.blocks());
+                total_blocks += metadata.blocks() / 2;
                 result.push_str(&print_metadata(&metadata));
             }
         }
@@ -67,10 +105,10 @@ pub fn ls(args: &[&str]) {
             if let Ok(metadata) = entry.metadata() {
                 result.push_str(&print_file_type(&metadata, &file_name));
             } else {
-                result.push_str(&format!("{}", file_name));
+                result.push_str(&format!("{}{}{}", color, file_name, RESET));
             }
         } else {
-            result.push_str(&format!("{}", file_name));
+            result.push_str(&format!("{}{}{}", color, file_name, RESET));
         }
 
         if !long_format {
@@ -82,7 +120,6 @@ pub fn ls(args: &[&str]) {
     if !long_format {
         result.push_str("\n");
     } else {
-        let total_blocks = (total_size as f64 / 512.0).ceil() as u32;
         println!("total {}", total_blocks);
     }
 
@@ -102,7 +139,7 @@ fn print_metadata(metadata: &Metadata) -> String {
     };
 
     format!(
-        "{} {:<2} {:<10} {:<10} {:<16}",
+        "{} {:1} {:<8} {:>5} {} ",
         permissions, link_count, owner_group, size, modified,
     )
 }
@@ -119,14 +156,15 @@ fn format_time(time: SystemTime) -> String {
     let total_mins = total_secs / 60;
     let mins = total_mins % 60;
     let total_hours = total_mins / 60;
-    let hours = (total_hours % 24) + 2; // +2 pour UTC+2 (ajustez selon votre fuseau horaire)
-    
+    let hours = total_hours % 24;
+
     // Calculer les jours depuis 1970-01-01
     let days_since_epoch = (total_hours / 24) as u32;
 
     let days_in_month = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-    let mois = ["Jan", "Feb", "Mar", "Apr", "May", "June", 
-                "July", "Aug", "Sept", "Oct", "Nov", "Dec"];
+    let mois = [
+        "Jan", "Feb", "Mar", "Apr", "May", "June", "July", "Aug", "Sept", "Oct", "Nov", "Dec",
+    ];
 
     // Calculer le mois et le jour
     //let mut year = 1970;
@@ -160,20 +198,28 @@ fn format_time(time: SystemTime) -> String {
     }
     let day = remaining_days + 1;
 
-    format!("{} {} {:02}:{:02}", 
-        mois[month],
-        day,
-        hours % 24,
-        mins)
+    format!("{} {:>2} {:02}:{:02}", mois[month], day, hours % 24, mins)
+}
+
+fn right_color(metadata: &Metadata) -> String {
+    if metadata.is_dir() {
+        format!("{}", PINK)
+    } else if metadata.permissions().mode() & 0o111 != 0 {
+        format!("{}", ORANGE)
+    } else if metadata.file_type().is_symlink() {
+        format!("{}", CYAN)
+    } else {
+        format!("{}", RESET)
+    }
 }
 
 fn print_file_type(metadata: &Metadata, file_name: &str) -> String {
     if metadata.is_dir() {
-        format!("{}/", file_name)
+        format!("{}{}/{}", PINK, file_name, RESET)
     } else if metadata.permissions().mode() & 0o111 != 0 {
-        format!("{}*", file_name)
+        format!("{}{}*{}", ORANGE, file_name, RESET)
     } else if metadata.file_type().is_symlink() {
-        format!("{}@", file_name)
+        format!("{}{}@{}", CYAN, file_name, RESET)
     } else {
         format!("{}", file_name)
     }
