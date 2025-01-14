@@ -7,9 +7,7 @@ use std::{
 
 const PINK: &str = "\x1b[35m";
 const ORANGE: &str = "\x1b[33m";
-const _BLUE: &str = "\x1b[34m"; // Dossiers
-const _GREEN: &str = "\x1b[32m"; // Fichiers exécutables
-const CYAN: &str = "\x1b[36m"; // Liens symboliques
+const CYAN: &str = "\x1b[36m";
 const RESET: &str = "\x1b[0m";
 
 pub fn ls(args: Vec<String>) {

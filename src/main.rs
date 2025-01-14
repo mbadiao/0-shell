@@ -1,20 +1,24 @@
 mod commands;
 use commands::{cat, cd, cp, echo, ls, mkdir, mv, pwd, rm};
-use std::{env, io::{self, Write}};
+use std::{
+    env,
+    io::{self, Write},
+};
+
+const RESET: &str = "\x1b[0m";
+const CYAN: &str = "\x1b[36m";
 
 fn main() {
     loop {
         let path = match env::current_dir() {
-            Ok(path) => {
-                path
-            }
+            Ok(path) => path.to_string_lossy().to_string(),
             Err(e) => {
                 eprintln!("Error getting the current directory: {}", e);
                 break;
             }
         };
 
-        print!("{:?}$ ", path.to_string_lossy());
+        print!("{}{}{}$ ", CYAN, path, RESET);
         std::io::stdout().flush().unwrap();
 
         // wait for a command
@@ -22,9 +26,9 @@ fn main() {
         if io::stdin().read_line(&mut input).is_err() || input.is_empty() {
             break;
         }
-        
+
         let trimmed = input.trim();
-        
+
         let parts = get_parts(trimmed.to_string());
         let (command, args) = parts;
 
@@ -48,19 +52,36 @@ fn main() {
 fn get_parts(input: String) -> (String, Vec<String>) {
     let mut parts = Vec::new();
     let mut current = String::new();
-    let mut in_quotes = false;
+    let mut in_double_quotes = false;
+    let mut in_single_quotes = false;
 
     for c in input.chars() {
         match c {
             '"' => {
-                // Basculer l'état d'analyse des guillemets
-                in_quotes = !in_quotes;
-                if !in_quotes && !current.is_empty() {
-                    parts.push(current.clone());
-                    current.clear();
+                if !in_single_quotes {
+                    // Basculer l'état pour les doubles guillemets
+                    in_double_quotes = !in_double_quotes;
+                    if !in_double_quotes && !current.is_empty() {
+                        parts.push(current.clone());
+                        current.clear();
+                    }
+                } else {
+                    current.push(c);
                 }
             }
-            ' ' if !in_quotes => {
+            '\'' => {
+                if !in_double_quotes {
+                    // Basculer l'état pour les simples guillemets
+                    in_single_quotes = !in_single_quotes;
+                    if !in_single_quotes && !current.is_empty() {
+                        parts.push(current.clone());
+                        current.clear();
+                    }
+                } else {
+                    current.push(c);
+                }
+            }
+            ' ' if !in_double_quotes && !in_single_quotes => {
                 // Ajouter la partie actuelle si un espace est trouvé en dehors des guillemets
                 if !current.is_empty() {
                     parts.push(current.clone());
