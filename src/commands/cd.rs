@@ -1,14 +1,13 @@
 use std::env;
 use std::path::Path;
 
-// Fonction principale qui sera appelée par le main
+// Main function of cd
 pub fn cd(args: Vec<String>) {
     if let Err(err) = handle_cd(args) {
         println!("{}", err);
     }
 }
 
-// Fonction qui gère la logique du cd
 fn handle_cd(args: Vec<String>) -> Result<(), String> {
     if args.len() > 1 {
         return Err("cd: too many arguments".to_string());

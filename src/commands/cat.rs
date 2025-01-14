@@ -15,11 +15,11 @@ pub fn cat(args: Vec<String>) {
 }
 
 fn print_file(filename: &str) -> io::Result<()> {
-    // Ouvrir le fichier
+    // Open the file
     let file = File::open(filename)?;
     let reader = BufReader::new(file);
 
-    // Lire et afficher chaque ligne
+    // Read and print each line
     for line in reader.lines() {
         match line {
             Ok(content) => println!("{}", content),

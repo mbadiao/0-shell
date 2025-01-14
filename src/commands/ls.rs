@@ -18,7 +18,7 @@ pub fn ls(args: Vec<String>) {
     let mut long_format = false;
     let mut show_file_type = false;
 
-    // Parse les arguments
+    // Sprinkle the arguments
     for arg in args {
         match arg.as_str() {
             "-a" => show_all = true,
@@ -31,7 +31,7 @@ pub fn ls(args: Vec<String>) {
         }
     }
 
-    // Lister les fichiers du répertoire courant
+    // List the current directory files
     let current_dir = match fs::read_dir(".") {
         Ok(entries) => entries,
         Err(e) => {
@@ -44,7 +44,7 @@ pub fn ls(args: Vec<String>) {
 
     if show_all {
         if long_format {
-            // Pour le format long, ajouter les métadonnées appropriées
+            //For the long format, add the appropriate metadata
             if let Ok(metadata) = fs::metadata(".") {
                 result.push_str(&print_metadata(&metadata));
                 if show_file_type {
@@ -74,7 +74,7 @@ pub fn ls(args: Vec<String>) {
         }
     }
 
-    // Trier les fichiers par ordre alphabétique
+    // Sort the files in alphabetical order
     entries.sort_by_key(|entry| entry.file_name());
 
     for entry in entries {
@@ -86,7 +86,6 @@ pub fn ls(args: Vec<String>) {
             color = right_color(&metadata);
         }
 
-        //println!("file_name: {}", file_name);
         if !show_all && file_name.starts_with('.') {
             continue;
         }
@@ -128,7 +127,6 @@ fn print_metadata(metadata: &Metadata) -> String {
     let link_count = get_link_count(metadata);
     let owner_group = get_owner_and_group(metadata);
     let size = metadata.len();
-    // let modified: DateTime<Local> = DateTime::from(metadata.modified()?);
 
     let modified = match metadata.modified() {
         Ok(time) => format_time(time),
@@ -142,20 +140,20 @@ fn print_metadata(metadata: &Metadata) -> String {
 }
 
 fn format_time(time: SystemTime) -> String {
-    // Obtenir les secondes depuis UNIX_EPOCH
+    // get the seconds from Unix_Epoch
     let duration = match time.duration_since(UNIX_EPOCH) {
         Ok(duration) => duration,
         Err(_) => return "date invalide".to_string(),
     };
 
-    // Convertir en composants de date
+    // Convert into date components
     let total_secs = duration.as_secs();
     let total_mins = total_secs / 60;
     let mins = total_mins % 60;
     let total_hours = total_mins / 60;
     let hours = total_hours % 24;
 
-    // Calculer les jours depuis 1970-01-01
+    // Calculate the days since 1970-01-01
     let days_since_epoch = (total_hours / 24) as u32;
 
     let days_in_month = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
@@ -163,28 +161,24 @@ fn format_time(time: SystemTime) -> String {
         "Jan", "Feb", "Mar", "Apr", "May", "June", "July", "Aug", "Sept", "Oct", "Nov", "Dec",
     ];
 
-    // Calculer le mois et le jour
-    //let mut year = 1970;
+    // Calculate the month and the day
     let mut remaining_days = days_since_epoch;
 
-    // Ajuster pour les années bissextiles
-    //let mut leap_years = 0;
+    // Adjust for bissextile years
     for y in 1970..=2024 {
         if (y % 4 == 0 && y % 100 != 0) || (y % 400 == 0) {
             if remaining_days >= 366 {
-                //leap_years += 1;
                 remaining_days -= 366;
             }
         } else if remaining_days >= 365 {
             remaining_days -= 365;
         }
         if remaining_days < 365 {
-            // year = y;
             break;
         }
     }
 
-    // Trouver le mois et le jour
+    // Find the month and the day
     let mut month = 0;
     for (i, &days) in days_in_month.iter().enumerate() {
         if remaining_days < days {
@@ -226,7 +220,7 @@ fn format_permissions(metadata: &Metadata) -> String {
     let permissions = metadata.permissions();
     let mode = permissions.mode();
 
-    // Type de fichier
+    // File type
     let file_type = if metadata.is_dir() {
         'd'
     } else if metadata.is_file() {
@@ -235,7 +229,7 @@ fn format_permissions(metadata: &Metadata) -> String {
         '?'
     };
 
-    // Permissions utilisateur (owner)
+    // User permissions (Owner)
     let user = format!(
         "{}{}{}",
         if mode & 0o400 != 0 { 'r' } else { '-' }, // Read
@@ -243,7 +237,7 @@ fn format_permissions(metadata: &Metadata) -> String {
         if mode & 0o100 != 0 { 'x' } else { '-' }  // Execute
     );
 
-    // Permissions groupe (group)
+    // PermissionsGroupe (group)
     let group = format!(
         "{}{}{}",
         if mode & 0o040 != 0 { 'r' } else { '-' }, // Read
@@ -251,7 +245,7 @@ fn format_permissions(metadata: &Metadata) -> String {
         if mode & 0o010 != 0 { 'x' } else { '-' }  // Execute
     );
 
-    // Permissions autres (others)
+    // PermissionsAutres (others)
     let others = format!(
         "{}{}{}",
         if mode & 0o004 != 0 { 'r' } else { '-' }, // Read
@@ -259,7 +253,7 @@ fn format_permissions(metadata: &Metadata) -> String {
         if mode & 0o001 != 0 { 'x' } else { '-' }  // Execute
     );
 
-    // Combiner le type de fichier et les permissions
+    //Combine the type of file and permissions
     format!("{}{}{}{}", file_type, user, group, others)
 }
 
@@ -271,7 +265,7 @@ fn get_owner_and_group(metadata: &Metadata) -> String {
     let uid = metadata.uid();
     let gid = metadata.gid();
 
-    // Récupérer le nom du propriétaire (user)
+    // Recover the owner's name (User)
     let user_name = unsafe {
         let pw = libc::getpwuid(uid);
         if pw.is_null() {
@@ -282,7 +276,7 @@ fn get_owner_and_group(metadata: &Metadata) -> String {
         }
     };
 
-    // Récupérer le nom du groupe
+    // Recover the name of the group
     let group_name = unsafe {
         let gr = libc::getgrgid(gid);
         if gr.is_null() {

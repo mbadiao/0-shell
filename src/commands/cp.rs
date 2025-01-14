@@ -19,7 +19,7 @@ fn copy(source: &str, destination: &str) -> io::Result<()> {
     let source_path = Path::new(source);
     let destination_path = Path::new(destination);
 
-    // Vérifier si la source existe
+    // Check if the source exist
     if !source_path.exists() {
         return Err(io::Error::new(
             io::ErrorKind::NotFound,
@@ -27,7 +27,7 @@ fn copy(source: &str, destination: &str) -> io::Result<()> {
         ));
     }
 
-    // Vérifier si la source est un répertoire
+    // Check if the source is a directory
     if source_path.is_dir() {
         return Err(io::Error::new(
             io::ErrorKind::InvalidInput,
@@ -35,7 +35,7 @@ fn copy(source: &str, destination: &str) -> io::Result<()> {
         ));
     }
 
-    // Déterminer le chemin final de destination
+    // Determine the final destination path
     let final_destination = if destination_path.is_dir() {
         destination_path.join(source_path.file_name().ok_or_else(|| {
             io::Error::new(io::ErrorKind::InvalidInput, "Invalid source filename")
@@ -44,7 +44,7 @@ fn copy(source: &str, destination: &str) -> io::Result<()> {
         destination_path.to_path_buf()
     };
 
-    // Vérifier si le chemin de destination existe
+    // Check if the destination path exist
     if !final_destination.parent().map_or(true, |p| p.exists()) {
         return Err(io::Error::new(
             io::ErrorKind::NotFound,
@@ -52,6 +52,6 @@ fn copy(source: &str, destination: &str) -> io::Result<()> {
         ));
     }
 
-    // Copier le fichier
+    // Copy the file
     fs::copy(source_path, &final_destination).map(|_| ())
 }

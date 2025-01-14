@@ -59,7 +59,6 @@ fn get_parts(input: String) -> (String, Vec<String>) {
         match c {
             '"' => {
                 if !in_single_quotes {
-                    // Basculer l'état pour les doubles guillemets
                     in_double_quotes = !in_double_quotes;
                     if !in_double_quotes && !current.is_empty() {
                         parts.push(current.clone());
@@ -71,7 +70,6 @@ fn get_parts(input: String) -> (String, Vec<String>) {
             }
             '\'' => {
                 if !in_double_quotes {
-                    // Basculer l'état pour les simples guillemets
                     in_single_quotes = !in_single_quotes;
                     if !in_single_quotes && !current.is_empty() {
                         parts.push(current.clone());
@@ -82,32 +80,27 @@ fn get_parts(input: String) -> (String, Vec<String>) {
                 }
             }
             ' ' if !in_double_quotes && !in_single_quotes => {
-                // Ajouter la partie actuelle si un espace est trouvé en dehors des guillemets
                 if !current.is_empty() {
                     parts.push(current.clone());
                     current.clear();
                 }
             }
             _ => {
-                // Ajouter le caractère courant à la partie actuelle
                 current.push(c);
             }
         }
     }
 
-    // Ajouter la dernière partie si elle existe
     if !current.is_empty() {
         parts.push(current);
     }
 
-    // Séparer la commande (première partie) et les arguments
     if let Some((command, args)) = parts.split_first() {
         (
             command.to_string(),
             args.iter().map(|s| s.to_string()).collect(),
         )
     } else {
-        // Si aucune commande ou argument, renvoyer une valeur par défaut
         ("".to_string(), vec![])
     }
 }

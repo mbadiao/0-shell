@@ -11,7 +11,7 @@ pub fn echo(args: Vec<String>) {
     // Join arguments and remove quotes
     let output: String = args[start_index..]
         .iter()
-        .map(|s| s.trim_matches('"'))  // Supprime les guillemets au début et à la fin
+        .map(|s| s.trim_matches('"'))
         .collect::<Vec<&str>>()
         .join(" ");
 
