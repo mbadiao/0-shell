@@ -22,7 +22,7 @@ fn print_file(filename: &str) -> io::Result<()> {
     // Read and print each line
     for line in reader.lines() {
         match line {
-            Ok(content) => print!("{}", content),
+            Ok(content) => println!("{}", content),
             Err(err) => return Err(err),
         }
     }
